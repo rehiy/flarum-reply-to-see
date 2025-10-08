@@ -25,22 +25,23 @@ class HideContentInPosts extends FormatContent
         }
 
         $replied = !$serializer->getActor()->isGuest() && in_array($serializer->getActor()->id, $users);
+
         if ($replied || $serializer->getActor()->isAdmin()) {
+            // 对于有权限的用户，直接移除 <reply2see> 标签，保留内部所有内容
             $newHTML = preg_replace(
                 '/<reply2see>(.*?)<\/reply2see>/is',
-                '<div class="reply2see"><div class="reply2see_title">' .
-                $this->translator->trans('rehiy-reply-to-see.forum.hidden_content') .
-                '</div>$1</div>',
+                '$1',
                 $newHTML
             );
         } else {
+            // 对于没有权限的用户，替换为提示信息
             $newHTML = preg_replace(
                 '/<reply2see>(.*?)<\/reply2see>/is',
                 '<div class="reply2see"><div class="reply2see_alert">' .
                 $this->translator->trans('rehiy-reply-to-see.forum.reply_to_see',
-                    array(
+                    [
                         '{reply}' => '<a class="reply2see_reply">' . $this->translator->trans('core.forum.discussion_controls.reply_button') . '</a>'
-                    )
+                    ]
                 ) . '</div></div>',
                 $newHTML
             );
@@ -50,5 +51,4 @@ class HideContentInPosts extends FormatContent
 
         return $attributes;
     }
-
 }
